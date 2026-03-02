@@ -1,328 +1,75 @@
-Divine Dessert is one of the famous cake shops. They have decided to open an online shopping portal and promote their sales. By automating the process, they can easily enter cake details. They have also decided to offer a maximum of 25% discount to their customers on the cakes ordered, based on the UPI method they choose for payment (PhonePe, Paytm, Google Pay).
-
-As a software developer, your task is to help them automate the above process by writing a simple Java program. The program should store the cake order details, calculate the cake ID and discount based on the UPI selected for payment, and calculate the final bill amount for the order.
-
-Component Specification: Cake (model Class)
-
-Type(Class)
-
-Attributes
-
-Methods
-
-Cake
-
-String cakeId
-
-String cakeName
-
-double costPerKg
-
-int quantity
-
-Getters and setters method for all the attributes are included in the code skeleton.
-
-Include a four-argument constructor in the given order: cakeId, cakeName, costPerKg, quantity
-
-Note: The methods and constructor should be public, and the attributes of the class should be private. 
-
-Component Specification: CakeOrder 
-
-Type(Class)
-
-Attributes
-
-Methods
-
-CakeOrder 
-
-List<Cake> cakeList
-
-double discount
-
-Getters and setters method for all the attributes are included in the code skeleton.
-
-Note: The methods and constructor should be public, and the attributes of the class should be private. 
-
-Requirement 1:  Validate cakeId
-
-Component Specification: Utility (Utility Class)
-
-Component Name
-
-Type (Class)
-
-Methods
-
-Responsibilities
-
-Validate the cakeId
-
-Utility
-
-public boolean validateCakeId(String cakeId) 
-
-This method should validate the cakeId.
-
-The cakeId should start with "CAKE" followed by a 3 digit number (digits can take values 0 to 9). If the cakeId is valid return true else throw a user-defined Exception "InvalidCakeIdException" with a message "Cake Id <<CakeId>> is not valid".
-
-Note: The methods and constructor should be public, and the attributes of the class should be private. 
-
-Requirement 2:  Add an array of Cake objects to the list
-
-Component Specification: CakeOrder 
-
-The method cakeBooking() takes the array of Cake object as an argument and adds it to the cakeList.
-
-Component Name
-
-Type (Class)
-
-Methods
-
-Responsibilities
-
-Add the Cake array to the cakeList
-
-CakeOrder
-
-public void cakeBooking(Cake cakeObject[])
-
-This method takes the array of Cake object as an argument and adds it to the cakeList.
-
- 
-
-
-
-
-
-
-
-
-
-Note: The methods and constructor should be public, and the attributes of the class should be private. 
-
-Requirement 3: Find the discount
-
-Divine Desserts provides a discount to the customers for the orders placed.  This discount is based on the UPI selected by the customer for the payment.
-
-UPI
-
-Discount ( in Percentage)
-
-PhonePe
-
-25
-
-GooglePay
-
-20
-
-Paytm
-
-15
-
- 
-
- 
-
-Assumption: All UPI Names are case Insensitive
-
-The method findDiscount() takes the UPIName as an argument and sets the value for the attribute discount based on the UPIName.
-
-Component Specification: CakeOrder
-
-Component Name
-
-Type(Class)
-
-Methods
-
-Responsibilities
-
-Find the discount percentage based on the UPI name selected by the customer
-
-CakeOrder
-
-public void findDiscount(String UPIName) 
-
-This method takes the UPIName as an argument and set the discount value to the discount attribute of the CakeOrder class.
-
-Note: The methods and constructor should be public, and the attributes of the class should be private. 
-
-Requirement 4:  Calculate the total bill
-
-An order can have multiple products.  For each order placed, the bill amount needs to be calculated.
-
-The method calculateTotalBill() calculates the bill amount by fetching the cake order details from the cakeList and returns the calculated amount.
-
-Component Specification: CakeOrder 
-
-Component Name
-
-Type(Class)
-
-Methods
-
-Responsibilities
-
-Calculate the total bill amount for the order placed by the customer.
-
-CakeOrder
-
-public double  calculateTotalBill() 
-
- 
-
-This method fetches the array of cakeObject in the cakeList and calculates the bill amount and returns the result.
-
-Note: The methods and constructor should be public, and the attributes of the class should be private. 
-
-The bill amount is calculated as shown below:
-
-Total Price = Total Price + (cost * quantity) of all cakes in the list.
-
-Bill Amount = Total Price - (Total Price * discount / 100)
-
-Example:
-
-Consider the input string[] are
-
-CAKE001:BlackForest:400:1
-
-CAKE002:Redvelvet:600:1
-
- 
-
-To calculate Total Price
-
-totalPrice = 0
-
-For 1st string CAKE001:BlackForest:400:1
-
-totalPrice = 0 + (400 * 1)
-
-totalPrice = 400
-
-For 2nd string CAKE002:Redvelvet:600:1
-
-totalPrice = 400 + (600*1)
-
-totalPrice = 1000
-
- 
-
-To calculate Bill Amount
-
-Assume UPI as Googlepay, then discountPercentage will be 20
-
-Bill Amount    = totalPrice - (totalPrice * discount / 100)
-
-                        = 1000 - ( 1000 * 20 / 100)
-
-Bill Amount    = 800
-
- 
-
-Requirement 5: Validation with InvalidCakeIdException
-
-Component Specification: InvalidCakeIdException (Exception Class)
-
-Component Name
-
-Type(Class)
-
-Methods
-
-Responsibilities
-
-Create a user defined exception
-
-InvalidCakeIdException
-
-public InvalidCakeIdException (String message)
-
-Set the message string to the superclass.
-
- 
-
-In the UserInterface class, in the main method provided, get the number of cakes and cake details from the user
-
-Get the cake details from the user as a single string with all the fields separated by ":" (refer sample input).
-The string contains <cakeId>:<cakeName>:<costPerKg>:<quantity> as fields.
-Store all the records in the string array and then invoke validateCakeId() by passing the cakeId.
-If the cakeId is valid return true else throw user defined exception along with the exception message "Cake Id <<CakeId>> is not valid".
-Make sure you handle the user defined exception thrown from the validateCakeId() method.
-Create an array of cakeObject for the valid records.
-Invoke the cakeBooking() method in the CakeOrder class by passing the array of cakeObject, the array should contain only valid records.
-Before calculating the bill, check if the cakeList has products. If the booking is empty display "Your booking is empty" else get the UPIName from the user and invoke the findDiscount() method in the CakeOrder class, then invoke the calculateTotalBill() method to calculate the total bill and return the same.
-Display the total bill as shown in the Sample Output
-Note:
-
-In the Sample Input / Output provided, the highlighted text in bold corresponds to the input given by the user, and the rest of the text represents the output.
-Ensure to follow the object-oriented specifications provided in the question description.
-Ensure to provide the names for the classes, attributes, and methods as specified in the question description.
-Adhere to the code template, if provided.
-Please don't use System.exit(0) to terminate the program.
-To get two decimal places, refer to the print statement mentioned below:
-System.out.printf("%.2f",totalBill);
- 
-
-Sample Input / Output 1 :
-
-Enter the total number of cakes needed
-
-3
-
-Enter the Cake details
-
-CAKE001:blackforest:400:3
-
-CAKE002:Whiteforest:500:4
-
-CAKE003:RedVelvet:600:2
-
-Enter the UPI name to avail offer
-
-googlepay
-
-Total Bill Amount: 3520.00 
-
-
-
-Sample Input/Output 2 :
-
-Enter the total number of cakes needed
-
-1
-
-Enter the Cake details
-
-AWWW666:RedVelvet:400:1
-
-Cake Id AWWW666 is not valid
-
-Your booking is empty
-
-
-
-Sample Input / Output 3 :
-
-Enter the total number of cakes needed
-
-2
-
-Enter the Cake details
-
-CAKE001:blackforest:400:3
-
-AWWW666:RedVelvet:400:1 
-
-Cake Id AWWW666 is not valid 
-
-
-Enter the UPI name to avail offer
-
-PhonePe
-
-Total Bill Amount: 900.00 
+Result description
+
+Fail 1 -- test17_CheckForTestMainMenu::
+$Expected output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Enter the UPI name to avail offer
+ Total Bill Amount: 3337.50]" Actual output:"[Enter the total number of cakes needed
+ Enter the Cake details
+
+Fail 2 -- test18_CheckDisplayingForTotalBillAndInvalidCakeId::
+$Expected output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Cake Id CAKE08 is not valid
+ Cake Id CAKE0045 is not valid
+ Enter the UPI name to avail offer
+ Total Bill Amount: 2465.00]" Actual output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Cake Id CAKE08 is not valid
+ Cake Id CAKE0045 is not valid
+
+Fail 3 -- test19_CheckDisplayingTotalBill::
+$Expected output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Enter the UPI name to avail offer
+ Total Bill Amount: 3412.50]" Actual output:"[Enter the total number of cakes needed
+ Enter the Cake details
+
+Fail 4 -- test20_CheckDisplayingEmptyCartAndInvalidCakeId::
+$Expected output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Cake Id CAKE0558 is not valid
+ Cake Id CAk111 is not valid
+ Your booking is empty]" Actual output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Cake Id CAKE0558 is not valid
+ Cake Id CAk111 is not valid
+
+Fail 5 -- test21_CheckForTestMainMenuForEmptyCart::
+$Expected output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Cake Id CAKE0045 is not valid
+ Your booking is empty]" Actual output:"[Enter the total number of cakes needed
+ Enter the Cake details
+ Cake Id CAKE0045 is not valid
+ Obtained Pass Percentage. Still  few testcases failed. Kindly revisit the Solution
+ Grading and Feedback
+Control Structure Manipulation - 34.00 / 34.00(Success)
+	* Check the logic of four argument constructor in the Cake class - 7.00 / 7.00
+	* Check the logic of findDiscount method for Paytm in the CakeOrder class - 6.00 / 6.00
+	* Check the logic of findDiscount method for PhonePe in the CakeOrder class - 6.00 / 6.00
+	* Check the logic of findDiscount method for GooglePay in the CakeOrder class - 7.00 / 7.00
+	* Check the logic of validateCakeId method for valid id in Utility class - 5.00 / 5.00
+	* Check the logic of validateCakeId method for invalid id in Utility class - 3.00 / 3.00
+
+Collection Manipulation - 38.00 / 38.00(Success)
+	* Check the logic of cakeBooking method - 5.00 / 5.00
+	* Check the logic of cakeBooking method for N order - 5.00 / 5.00
+	* Check the logic of cakeBooking method for Empty cart - 5.00 / 5.00
+	* Check the logic of calculateTotalBill method for one cake with discount - 5.00 / 5.00
+	* Check the logic of calculateTotalBill method for N cake with discount using GooglePay  - 5.00 / 5.00
+	* Check the logic of calculateTotalBill method for cake with discount using PhonePe - 5.00 / 5.00
+	* Check the logic of calculateTotalBill method for cake discount using Paytm - 4.00 / 4.00
+	* Check the logic of calculateTotalBill method  - 4.00 / 4.00
+
+Exception Handling - 5.00 / 5.00(Success)
+	* Constructor in InvalidCakeIdException class - 5.00 / 5.00
+
+Presentation - 0.00 / 23.00(Failed)
+	* Check the output for main menu - 0.00 / 5.00
+	* Check the output for displaying total bill and invalid cake id - 0.00 / 3.00
+	* Check the output for displaying total bill - 0.00 / 5.00
+	* Check the output for displaying booking empty and invalid cake id - 0.00 / 5.00
+	* Check the output for main menu for empty booking - 0.00 / 5.00
+
+ Test Case Failed
