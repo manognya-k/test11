@@ -1,0 +1,112 @@
+🔹 EPIC 1: Authentication
+Smaller User Stories
+US-01.1 – User Registration
+As a new user, I want to register an account so that I can access the platform.
+US-01.2 – User Login
+As a user, I want to log in securely so that I can access my dashboard.
+US-01.3 – Role-Based Login
+As a system, I want to identify user roles so that users see the correct dashboard (Patient/Doctor/Admin).
+US-01.4 – Password Reset
+As a user, I want to reset my password so that I can recover my account.
+US-01.5 – Session Management
+As a system, I want to manage user sessions so that unauthorized access is prevented.
+🔹 EPIC 2: Patient Management
+Smaller User Stories
+US-02.1 – Create Patient Profile
+As a patient, I want to create my profile so that my details are stored.
+US-02.2 – Update Profile
+As a patient, I want to update my personal information.
+US-02.3 – View Medical History
+As a patient, I want to view my past medical records.
+US-02.4 – Upload Documents
+As a patient, I want to upload documents like prescriptions.
+US-02.5 – Doctor View Patient Profile
+As a doctor, I want to view patient profiles for treatment.
+🔹 EPIC 3: Appointment Management
+Smaller User Stories
+US-03.1 – Search Doctor
+As a patient, I want to search for doctors by specialization.
+US-03.2 – View Doctor Availability
+As a patient, I want to see available time slots.
+US-03.3 – Book Appointment
+As a patient, I want to book an appointment.
+US-03.4 – Cancel Appointment
+As a patient, I want to cancel my appointment.
+US-03.5 – Reschedule Appointment
+As a patient, I want to reschedule appointments.
+US-03.6 – Appointment Notifications
+As a user, I want reminders for appointments.
+🔹 EPIC 4: Doctor Module
+Smaller User Stories
+US-04.1 – View Patient List
+As a doctor, I want to see my patients list.
+US-04.2 – Access Patient Records
+As a doctor, I want to view patient history.
+US-04.3 – Add Diagnosis
+As a doctor, I want to update diagnosis details.
+US-04.4 – Write Prescription
+As a doctor, I want to prescribe medicines.
+US-04.5 – Manage Availability
+As a doctor, I want to update my schedule.
+🔹 EPIC 5: Diagnostics & Reports
+Smaller User Stories
+US-05.1 – Upload Lab Reports
+As a doctor/lab staff, I want to upload reports.
+US-05.2 – View Reports
+As a patient, I want to view my reports.
+US-05.3 – Download Reports
+As a patient, I want to download reports.
+US-05.4 – Report History
+As a user, I want to see previous reports.
+US-05.5 – AI Report Explanation
+As a patient, I want reports explained in simple terms.
+🔹 EPIC 6: Hospital Management
+Smaller User Stories
+US-06.1 – Add Hospital
+As an admin, I want to add hospital branches.
+US-06.2 – Update Hospital Details
+As an admin, I want to edit hospital information.
+US-06.3 – Manage Departments
+As an admin, I want to manage departments.
+US-06.4 – Track Resources
+As an admin, I want to monitor beds and ICU availability.
+US-06.5 – View Hospital Performance
+As an admin, I want performance insights.
+🔹 EPIC 7: Billing & Payments
+Smaller User Stories
+US-07.1 – Generate Bill
+As a system, I want to generate bills.
+US-07.2 – View Bill
+As a patient, I want to view my bill.
+US-07.3 – Payment Processing
+As a patient, I want to pay bills online.
+US-07.4 – Track Payment Status
+As an admin, I want to track payments.
+🔹 EPIC 8: Analytics Dashboard
+Smaller User Stories
+US-08.1 – View Patient Flow
+As an admin, I want to see patient trends.
+US-08.2 – Revenue Analytics
+As an admin, I want revenue reports.
+US-08.3 – Bed Occupancy Metrics
+As an admin, I want occupancy data.
+US-08.4 – Filter Analytics
+As an admin, I want to filter data by hospital/date.
+🔹 EPIC 9: AI Assistant
+Smaller User Stories
+US-09.1 – Chat Interface
+As a user, I want to interact with chatbot.
+US-09.2 – Appointment Assistance
+As a user, I want AI help in booking appointments.
+US-09.3 – Report Explanation
+As a user, I want AI to explain reports.
+US-09.4 – Hospital Query
+As a user, I want to ask hospital-related questions.
+🔹 EPIC 10: Notifications
+Smaller User Stories
+US-10.1 – Appointment Reminder
+As a user, I want reminders.
+US-10.2 – Report Ready Notification
+As a patient, I want notification when reports are ready.
+US-10.3 – Payment Notification
+As a user, I want payment updates.
