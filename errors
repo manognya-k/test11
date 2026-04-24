@@ -235,3 +235,52 @@ shop_mongodb  | {"t":{"$date":"2026-04-24T18:41:54.825+00:00"},"s":"I",  "c":"NE
       interval: 10s
       timeout: 5s
       retries: 5
+
+
+
+(venv) PS D:\shopping_assistant_capstone> docker compose up -d
+time="2026-04-25T00:14:29+05:30" level=warning msg="D:\\shopping_assistant_capstone\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+[+] Running 5/5
+ ✔ Network shopping_assistant_capstone_default      Created    0.1s 
+ ✔ Volume "shopping_assistant_capstone_mongo_data"  Created    0.0s 
+ ✔ Container shop_mongodb                           Started    1.0s 
+ ✔ Container shop_postgres                          Started    1.1s 
+ ✔ Container shop_redis                             Started    0.9s 
+(venv) PS D:\shopping_assistant_capstone> docker compose logs mongodb --tail=20
+time="2026-04-25T00:14:49+05:30" level=warning msg="D:\\shopping_assistant_capstone\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.224+00:00"},"s":"I",  "c":"ACCESS",   "id":10483900,"ctx":"conn1","msg":"Connection not authenticating","attr":{"client":"127.0.0.1:37286","doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.229+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:37292","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"95764a45-9099-4eb3-839b-5bd7ed06d44b"}},"connectionId":2,"connectionCount":2}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.230+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn2","msg":"client metadata","attr":{"remote":"127.0.0.1:37292","client":"conn2","negotiatedCompressors":[],"doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.230+00:00"},"s":"I",  "c":"ACCESS",   "id":10483900,"ctx":"conn2","msg":"Connection not authenticating","attr":{"client":"127.0.0.1:37292","doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.243+00:00"},"s":"I",  "c":"NETWORK",  "id":6788700, "ctx":"conn2","msg":"Received first command on ingress connection since session start or auth handshake","attr":{"elapsedMillis":13}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.332+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:37300","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"1dad0fa1-2242-41cb-9c30-a4f635989063"}},"connectionId":3,"connectionCount":3}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.332+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:37314","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"858ea5be-453f-40c3-99d0-9c7006541d7d"}},"connectionId":4,"connectionCount":4}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.335+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn3","msg":"client metadata","attr":{"remote":"127.0.0.1:37300","client":"conn3","negotiatedCompressors":[],"doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.336+00:00"},"s":"I",  "c":"ACCESS",   "id":10483900,"ctx":"conn3","msg":"Connection not authenticating","attr":{"client":"127.0.0.1:37300","doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.336+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn4","msg":"client metadata","attr":{"remote":"127.0.0.1:37314","client":"conn4","negotiatedCompressors":[],"doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.336+00:00"},"s":"I",  "c":"ACCESS",   "id":10483900,"ctx":"conn4","msg":"Connection not authenticating","attr":{"client":"127.0.0.1:37314","doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.339+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:37322","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"455d5e7c-e7ea-4cb4-95ad-f6afecee04f5"}},"connectionId":5,"connectionCount":5}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.342+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn5","msg":"client metadata","attr":{"remote":"127.0.0.1:37322","client":"conn5","negotiatedCompressors":[],"doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.342+00:00"},"s":"I",  "c":"ACCESS",   "id":10483900,"ctx":"conn5","msg":"Connection not authenticating","attr":{"client":"127.0.0.1:37322","doc":{"application":{"name":"mongosh 2.8.2"},"driver":{"name":"nodejs|mongosh","version":"7.1.0|2.8.2"},"platform":"Node.js v24.14.1, LE","os":{"name":"linux","architecture":"x64","version":"3.10.0-327.22.2.el7.x86_64","type":"Linux"},"env":{"container":{"runtime":"docker"}}}}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.346+00:00"},"s":"I",  "c":"NETWORK",  "id":6788700, "ctx":"conn5","msg":"Received first command on ingress connection since session start or auth handshake","attr":{"elapsedMillis":4}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.350+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn1","msg":"Connection ended","attr":{"remote":"127.0.0.1:37286","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"f5cd8589-7a26-4153-89aa-8f3021f138c8"}},"connectionId":1,"connectionCount":4}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.350+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn5","msg":"Connection ended","attr":{"remote":"127.0.0.1:37322","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"455d5e7c-e7ea-4cb4-95ad-f6afecee04f5"}},"connectionId":5,"connectionCount":3}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.351+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn4","msg":"Connection ended","attr":{"remote":"127.0.0.1:37314","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"858ea5be-453f-40c3-99d0-9c7006541d7d"}},"connectionId":4,"connectionCount":2}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.351+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn3","msg":"Connection ended","attr":{"remote":"127.0.0.1:37300","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"1dad0fa1-2242-41cb-9c30-a4f635989063"}},"connectionId":3,"connectionCount":1}}
+shop_mongodb  | {"t":{"$date":"2026-04-24T18:44:41.351+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn2","msg":"Connection ended","attr":{"remote":"127.0.0.1:37292","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"95764a45-9099-4eb3-839b-5bd7ed06d44b"}},"connectionId":2,"connectionCount":0}}                                     
+(venv) PS D:\shopping_assistant_capstone> docker compose ps         
+yaml: line 3: did not find expected key                             
+(venv) PS D:\shopping_assistant_capstone> curl http://localhost:8000/health/ | python -m json.tool
+
+Security Warning: Script Execution Risk
+Invoke-WebRequest parses the content of the web page. Script code 
+in the web page might be run when the page is parsed.
+      RECOMMENDED ACTION:
+      Use the -UseBasicParsing switch to avoid script code 
+execution.
+
+      Do you want to continue?
+    
+[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  
+[?] Help(default is "N"): y
+Expecting value: line 3 column 1 (char 2)
