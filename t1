@@ -1,0 +1,493 @@
+2. Folder/File Structure
+shopping-assistant/
+├── .env
+├── docker-compose.yml
+├── requirements.txt
+├── backend/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── config.py
+│   ├── ollama_client.py
+│   └── routers/
+│       ├── __init__.py
+│       └── health.py
+└── scripts/
+    └── test_ollama.py
+3. Full Code for Every File
+.env
+
+# Ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3
+# PostgreSQL
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=shopuser
+POSTGRES_PASSWORD=shoppass
+POSTGRES_DB=shopping_assistant
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=redispass
+# MongoDB
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_USER=mongouser
+MONGO_PASSWORD=mongopass
+MONGO_DB=conversation_logs
+# FastAPI
+API_HOST=0.0.0.0
+API_PORT=8000
+API_SECRET_KEY=supersecretkey_change_in_production
+DEBUG=true
+docker-compose.yml
+
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: shop_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shopuser
+      POSTGRES_PASSWORD: shoppass
+      POSTGRES_DB: shopping_assistant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shopuser -d shopping_assistant"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: shop_redis
+    restart: unless-stopped
+    command: redis-server --requirepass redispass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redispass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: shop_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+      MONGO_INITDB_DATABASE: conversation_logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:
+requirements.txt
+
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.1
+pydantic-settings==2.3.0
+python-dotenv==1.0.1
+# LangChain + Ollama
+langchain==0.2.5
+langchain-community==0.2.5
+langchain-core==0.2.9
+# Databases
+psycopg2-binary==2.9.9
+redis==5.0.6
+pymongo==4.7.2
+sqlalchemy==2.0.30
+# Utilities
+httpx==0.27.0
+tenacity==8.3.0
+structlog==24.2.0
+backend/__init__.py
+
+backend/config.py
+
+from pydantic_settings import BaseSettings
+from functools import lru_cache
+
+
+class Settings(BaseSettings):
+    # Ollama
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3"
+
+    # PostgreSQL
+    postgres_host: str = "localhost"
+    postgres_port: int = 5432
+    postgres_user: str = "shopuser"
+    postgres_password: str = "shoppass"
+    postgres_db: str = "shopping_assistant"
+
+    # Redis
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = "redispass"
+
+    # MongoDB
+    mongo_host: str = "localhost"
+    mongo_port: int = 27017
+    mongo_user: str = "mongouser"
+    mongo_password: str = "mongopass"
+    mongo_db: str = "conversation_logs"
+
+    # FastAPI
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+    api_secret_key: str = "supersecretkey_change_in_production"
+    debug: bool = True
+
+    @property
+    def postgres_url(self) -> str:
+        return (
+            f"postgresql://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/0"
+
+    @property
+    def mongo_url(self) -> str:
+        return (
+            f"mongodb://{self.mongo_user}:{self.mongo_password}"
+            f"@{self.mongo_host}:{self.mongo_port}/{self.mongo_db}?authSource=admin"
+        )
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+backend/ollama_client.py
+
+import structlog
+from langchain_community.chat_models import ChatOllama
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.outputs import ChatResult
+from tenacity import retry, stop_after_attempt, wait_exponential
+from backend.config import get_settings
+
+log = structlog.get_logger()
+
+settings = get_settings()
+
+
+def get_llm(temperature: float = 0.7, model: str | None = None) -> ChatOllama:
+    """Return a configured ChatOllama instance."""
+    return ChatOllama(
+        model=model or settings.ollama_model,
+        base_url=settings.ollama_base_url,
+        temperature=temperature,
+    )
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+)
+def invoke_llm(system_prompt: str, user_message: str, temperature: float = 0.7) -> str:
+    """Send a message to Ollama and return the text response."""
+    llm = get_llm(temperature=temperature)
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=user_message),
+    ]
+    log.info("ollama_invoke", model=settings.ollama_model, message_preview=user_message[:80])
+    result: ChatResult = llm.invoke(messages)
+    response_text = result.content
+    log.info("ollama_response", preview=response_text[:80])
+    return response_text
+
+
+async def invoke_llm_async(
+    system_prompt: str, user_message: str, temperature: float = 0.7
+) -> str:
+    """Async version of invoke_llm."""
+    llm = get_llm(temperature=temperature)
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=user_message),
+    ]
+    log.info("ollama_invoke_async", model=settings.ollama_model)
+    result: ChatResult = await llm.ainvoke(messages)
+    return result.content
+backend/routers/__init__.py
+
+backend/routers/health.py
+
+import time
+import redis as redis_lib
+import psycopg2
+from pymongo import MongoClient
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from backend.config import get_settings
+from backend.ollama_client import invoke_llm_async
+
+router = APIRouter(prefix="/health", tags=["health"])
+settings = get_settings()
+
+
+class ServiceStatus(BaseModel):
+    status: str
+    latency_ms: float | None = None
+    error: str | None = None
+
+
+class HealthResponse(BaseModel):
+    overall: str
+    services: dict[str, ServiceStatus]
+    timestamp: float
+
+
+def _check_postgres() -> ServiceStatus:
+    t0 = time.perf_counter()
+    try:
+        conn = psycopg2.connect(settings.postgres_url, connect_timeout=3)
+        conn.close()
+        return ServiceStatus(status="ok", latency_ms=round((time.perf_counter() - t0) * 1000, 2))
+    except Exception as e:
+        return ServiceStatus(status="error", error=str(e))
+
+
+def _check_redis() -> ServiceStatus:
+    t0 = time.perf_counter()
+    try:
+        r = redis_lib.from_url(settings.redis_url, socket_connect_timeout=3)
+        r.ping()
+        return ServiceStatus(status="ok", latency_ms=round((time.perf_counter() - t0) * 1000, 2))
+    except Exception as e:
+        return ServiceStatus(status="error", error=str(e))
+
+
+def _check_mongo() -> ServiceStatus:
+    t0 = time.perf_counter()
+    try:
+        client = MongoClient(settings.mongo_url, serverSelectionTimeoutMS=3000)
+        client.admin.command("ping")
+        client.close()
+        return ServiceStatus(status="ok", latency_ms=round((time.perf_counter() - t0) * 1000, 2))
+    except Exception as e:
+        return ServiceStatus(status="error", error=str(e))
+
+
+@router.get("/", response_model=HealthResponse)
+def health_check():
+    services = {
+        "postgres": _check_postgres(),
+        "redis": _check_redis(),
+        "mongodb": _check_mongo(),
+    }
+    overall = "ok" if all(s.status == "ok" for s in services.values()) else "degraded"
+    return HealthResponse(overall=overall, services=services, timestamp=time.time())
+
+
+@router.get("/ollama", response_model=ServiceStatus)
+async def ollama_health():
+    t0 = time.perf_counter()
+    try:
+        response = await invoke_llm_async(
+            system_prompt="You are a health check bot. Reply with exactly one word.",
+            user_message="Respond with: OK",
+            temperature=0.0,
+        )
+        return ServiceStatus(
+            status="ok",
+            latency_ms=round((time.perf_counter() - t0) * 1000, 2),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Ollama unreachable: {e}")
+backend/main.py
+
+import structlog
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from backend.config import get_settings
+from backend.routers import health
+
+log = structlog.get_logger()
+settings = get_settings()
+
+app = FastAPI(
+    title="AI Shopping Assistant",
+    description="Multi-Agent Intelligent Shopping Assistant & Dynamic Pricing Optimizer",
+    version="0.1.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(health.router)
+
+
+@app.on_event("startup")
+async def startup_event():
+    log.info("server_starting", model=settings.ollama_model, debug=settings.debug)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    log.info("server_stopping")
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "backend.main:app",
+        host=settings.api_host,
+        port=settings.api_port,
+        reload=settings.debug,
+        log_level="info",
+    )
+scripts/test_ollama.py
+
+"""
+Standalone script to verify Ollama is reachable and responding correctly.
+Run from the project root: python scripts/test_ollama.py
+"""
+import sys
+import time
+
+sys.path.insert(0, ".")
+
+from backend.ollama_client import invoke_llm
+from backend.config import get_settings
+
+settings = get_settings()
+
+TESTS = [
+    {
+        "name": "Basic response",
+        "system": "You are a helpful assistant. Keep answers under 20 words.",
+        "user": "What is 2 + 2?",
+    },
+    {
+        "name": "Shopping domain awareness",
+        "system": "You are a shopping assistant. Keep answers under 30 words.",
+        "user": "Suggest one feature to look for when buying a budget smartphone.",
+    },
+    {
+        "name": "Hindi language test",
+        "system": "You are a multilingual assistant. Reply in Hindi. Keep answers under 20 words.",
+        "user": "नमस्ते! आप कैसे हैं?",
+    },
+]
+
+
+def run_tests():
+    print(f"\n{'='*60}")
+    print(f"  Ollama Integration Test")
+    print(f"  Model : {settings.ollama_model}")
+    print(f"  URL   : {settings.ollama_base_url}")
+    print(f"{'='*60}\n")
+
+    passed = 0
+    for i, test in enumerate(TESTS, 1):
+        print(f"[Test {i}] {test['name']}")
+        print(f"  Input : {test['user']}")
+        t0 = time.perf_counter()
+        try:
+            response = invoke_llm(
+                system_prompt=test["system"],
+                user_message=test["user"],
+                temperature=0.3,
+            )
+            latency = round((time.perf_counter() - t0) * 1000)
+            print(f"  Output: {response.strip()[:120]}")
+            print(f"  Latency: {latency}ms  ✓ PASSED\n")
+            passed += 1
+        except Exception as e:
+            print(f"  ERROR: {e}  ✗ FAILED\n")
+
+    print(f"{'='*60}")
+    print(f"  Results: {passed}/{len(TESTS)} tests passed")
+    print(f"{'='*60}\n")
+    sys.exit(0 if passed == len(TESTS) else 1)
+
+
+if __name__ == "__main__":
+    run_tests()
+4. Exact Terminal Commands
+Run these in order from the shopping-assistant/ root directory:
+
+# 1. Install Ollama (Windows — run in PowerShell as admin, or download installer)
+# https://ollama.com/download  → install, then open a new terminal
+
+# 2. Pull the LLM model (run in any terminal after Ollama is installed)
+ollama pull llama3
+
+# 3. Verify Ollama is running
+ollama list
+
+# 4. Create project folder and navigate into it
+mkdir shopping-assistant
+cd shopping-assistant
+
+# 5. Create a Python virtual environment
+python -m venv venv
+
+# 6. Activate the virtual environment (Windows)
+venv\Scripts\activate
+
+# 7. Install Python dependencies
+pip install -r requirements.txt
+
+# 8. Start infrastructure services (PostgreSQL, Redis, MongoDB)
+docker compose up -d
+
+# 9. Wait ~15 seconds, then verify all containers are healthy
+docker compose ps
+
+# 10. Start the FastAPI server
+python -m backend.main
+5. How to Test
+Open a second terminal (with venv activated, from shopping-assistant/):
+
+# Test 1 — Run the standalone Ollama integration test
+python scripts/test_ollama.py
+# Expected: 3/3 tests passed, latency displayed per test
+
+# Test 2 — Hit the infrastructure health endpoint
+curl http://localhost:8000/health/
+# Expected: {"overall":"ok","services":{"postgres":{"status":"ok"},"redis":{"status":"ok"},"mongodb":{"status":"ok"}},...}
+
+# Test 3 — Hit the Ollama health endpoint
+curl http://localhost:8000/health/ollama
+# Expected: {"status":"ok","latency_ms":...}
+
+# Test 4 — Open interactive API docs in browser
+# Navigate to: http://localhost:8000/docs
