@@ -19,3 +19,20 @@ Limited visibility into hospital resources such as beds and medical inventory.
 Lack of intelligent tools to assist with medical information and decision-making.
 
 These challenges highlight the need for a centralized and intelligent healthcare management platform.
+
+
+
+## YOUR TASK
+
+Implement this project **step by step**, starting from Phase 1 MVP and progressing through Phase 5. For each step:
+
+1. Tell me exactly what we're building in this step
+2. Give me the **complete file/folder structure** for that step
+3. Give me the **full code** for every file (no placeholders, no "fill this in later")
+4. Tell me the **exact terminal commands** to run (pip install, docker commands, etc.)
+5. Tell me how to **test** that the step works before moving on
+6. Tell me what the **next step** will be
+
+Use Ollama as the LLM backend throughout. Start with setting up the project skeleton and Ollama integration first.
+
+Begin with **Step 1: Project Setup & Ollama Integration**.
