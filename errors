@@ -27,6 +27,7 @@ def _check_postgres() -> ServiceStatus:
     t0 = time.perf_counter()
     try:
         conn = psycopg2.connect(settings.postgres_url, connect_timeout=3)
+
         conn.close()
         return ServiceStatus(status="ok", latency_ms=round((time.perf_counter() - t0) * 1000, 2))
     except Exception as e:
@@ -357,4 +358,18 @@ python -c "import urllib.request, json; r=urllib.request.urlopen('http://localho
 
 # Check Ollama endpoint
 python -c "import urllib.request, json; r=urllib.request.urlopen('http://localhost:8000/health/ollama'); print(json.dumps(json.load(r), indent=2))"
+
+
+local     shopping_assistant_capstone_redis_data
+(venv) PS D:\shopping_assistant_capstone> docker compose logs mongodb 2>&1 | head -50
+head : The term 'head' is not recognized as the name of a cmdlet, 
+function, script file, or operable program. Check the spelling of 
+the name, or if a path was included, verify that the path is 
+correct and try again.
+At line:1 char:36
++ docker compose logs mongodb 2>&1 | head -50
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (head:String) [], Co 
+   mmandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
 
