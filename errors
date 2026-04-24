@@ -216,3 +216,22 @@ shop_mongodb  | {"t":{"$date":"2026-04-24T18:41:54.825+00:00"},"s":"I",  "c":"NE
 shop_mongodb  | {"t":{"$date":"2026-04-24T18:41:54.825+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn1079","msg":"Connection ended","attr":{"remote":"127.0.0.1:39474","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"711a184f-3e72-461b-9d50-1db9e14bc42e"}},"connectionId":1079,"connectionCount":2}}
 shop_mongodb  | {"t":{"$date":"2026-04-24T18:41:54.825+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn1078","msg":"Connection ended","attr":{"remote":"127.0.0.1:39462","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"96b10cf2-6ec7-41db-9f9f-4af22db1bc7f"}},"connectionId":1078,"connectionCount":1}}
 shop_mongodb  | {"t":{"$date":"2026-04-24T18:41:54.825+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn1077","msg":"Connection ended","attr":{"remote":"127.0.0.1:39460","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"047b5f48-685c-460c-95dc-616707ce3971"}},"connectionId":1077,"connectionCount":0}}
+
+
+  mongodb:
+    image: mongo:7
+    container_name: shop_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+      MONGO_INITDB_DATABASE: conversation_logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "mongouser", "--password", "mongopass", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
