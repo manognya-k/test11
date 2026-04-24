@@ -284,3 +284,77 @@ execution.
 [Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  
 [?] Help(default is "N"): y
 Expecting value: line 3 column 1 (char 2)
+
+
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: shop_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shopuser
+      POSTGRES_PASSWORD: shoppass
+      POSTGRES_DB: shopping_assistant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shopuser -d shopping_assistant"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: shop_redis
+    restart: unless-stopped
+    command: redis-server --requirepass redispass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redispass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: shop_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+      MONGO_INITDB_DATABASE: conversation_logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: >
+        ["CMD", "mongosh",
+        "--username", "mongouser",
+        "--password", "mongopass",
+        "--authenticationDatabase", "admin",
+        "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:
+
+
+
+
+# Check health endpoint properly
+python -c "import urllib.request, json; r=urllib.request.urlopen('http://localhost:8000/health/'); print(json.dumps(json.load(r), indent=2))"
+
+# Check Ollama endpoint
+python -c "import urllib.request, json; r=urllib.request.urlopen('http://localhost:8000/health/ollama'); print(json.dumps(json.load(r), indent=2))"
+
