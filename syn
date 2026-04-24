@@ -36,3 +36,93 @@ Implement this project **step by step**, starting from Phase 1 MVP and progressi
 Use Ollama as the LLM backend throughout. Start with setting up the project skeleton and Ollama integration first.
 
 Begin with **Step 1: Project Setup & Ollama Integration**.
+
+
+## PHASE 3 — Build these features:
+
+1. **Dynamic Pricing Engine**
+   - Pricing Negotiation Agent adjusts price based on: demand signals, inventory levels, 
+     customer segment, time-of-day/seasonal factors, profit margin targets
+   - Inputs: product stock_quantity, customer price_sensitivity, cart_value, time
+   - Output: discounted_price with reasoning
+   - Store pricing rules in PostgreSQL
+
+2. **Comparison Agent (intelligent)**
+   - Given 2–3 product_ids, generate side-by-side feature comparison
+   - Pros/cons analysis per product
+   - Final ranked recommendation with reasoning
+   - Response must follow the Agent Response Schema
+
+3. **Voice Input/Output**
+   - Speech-to-text: Whisper (openai-whisper library, run locally)
+   - Text-to-speech: gTTS
+   - Expose /voice/input and /voice/output FastAPI endpoints
+   - Streamlit UI should have a mic button and audio playback
+
+4. **Context Memory Across Sessions**
+   - Store full conversation history in Redis with TTL of 24 hours
+   - On new message, load last 10 turns from Redis and inject into agent context
+   - Key: session_id, Value: list of {role, content, timestamp}
+
+---
+
+## PHASE 4 — Build these features:
+
+1. **Advanced Personalization with Behavior Learning**
+   - Track browsing duration, click patterns, repeat searches
+   - Update customer profile score for categories/brands in real time
+   - Recommendation Agent uses updated profile to re-rank results
+   - Store behavior events in MongoDB with schema:
+     {customer_id, event_type, product_id, timestamp, duration_seconds}
+
+2. **Bundle Recommendations and Cart Optimization**
+   - Cart Management Agent suggests complementary products based on cart contents
+   - Bundle discount logic: if 2+ items from same category, apply 5% extra discount
+   - "Frequently bought together" logic using co-purchase history from PostgreSQL
+
+3. **Abandoned Cart Recovery**
+   - Celery beat task runs every 30 minutes
+   - Detects carts with items added but no purchase in last 2 hours
+   - Generates a personalized recovery message via LLM
+   - Stores recovery message in Redis, exposes /cart/recovery/{customer_id} endpoint
+
+4. **A/B Testing Framework for Pricing**
+   - On each session, assign customer to group A or B (stored in Redis)
+   - Group A: rule-based pricing (Phase 1 logic)
+   - Group B: dynamic pricing engine (Phase 3 logic)
+   - Log pricing decisions and outcomes to PostgreSQL table: ab_test_results
+   - Expose /analytics/ab-results endpoint returning conversion rate per group
+
+---
+
+## PHASE 5 — Build these features:
+
+1. **Real-Time Competitor Price Monitoring**
+   - Celery periodic task (every 6 hours) fetches simulated competitor prices
+   - Store in PostgreSQL table: competitor_prices {product_id, competitor_name, price, fetched_at}
+   - Pricing Negotiation Agent reads this table to undercut or match competitor price
+   - Expose /products/{product_id}/competitor-prices endpoint
+
+2. **Predictive Inventory Optimization**
+   - Train a simple scikit-learn linear regression model on purchase_history data
+   - Predict stock depletion date per product
+   - Store predictions in PostgreSQL: inventory_predictions {product_id, predicted_depletion_date, confidence}
+   - Recommendation Agent deprioritizes products with predicted_depletion_date within 3 days
+   - Expose /inventory/predictions endpoint
+
+3. **Multi-Modal Input — Image Search**
+   - Accept image upload via /search/image endpoint (FastAPI UploadFile)
+   - Use CLIP model (via sentence-transformers) to generate image embedding
+   - Compare against product image embeddings stored in FAISS
+   - Return top 5 visually similar products
+   - Add image upload button to Streamlit UI
+
+4. **Advanced Analytics Dashboard**
+   - Separate Streamlit page (/analytics)
+   - Charts using Plotly:
+     - Conversion rate over time (line chart)
+     - Top 10 products by recommendation frequency (bar chart)
+     - Cart abandonment rate by customer segment (pie chart)
+     - A/B test results comparison (grouped bar chart)
+     - Average response latency over time (line chart)
+   - Data sourced from PostgreSQL and MongoDB
