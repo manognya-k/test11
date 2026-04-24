@@ -1,0 +1,183 @@
+import time
+import redis as redis_lib
+import psycopg2
+from pymongo import MongoClient
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from backend.config import get_settings
+from backend.ollama_client import invoke_llm_async
+
+router = APIRouter(prefix="/health", tags=["health"])
+settings = get_settings()
+
+
+class ServiceStatus(BaseModel):
+    status: str
+    latency_ms: float | None = None
+    error: str | None = None
+
+
+class HealthResponse(BaseModel):
+    overall: str
+    services: dict[str, ServiceStatus]
+    timestamp: float
+
+
+def _check_postgres() -> ServiceStatus:
+    t0 = time.perf_counter()
+    try:
+        conn = psycopg2.connect(settings.postgres_url, connect_timeout=3)
+        conn.close()
+        return ServiceStatus(status="ok", latency_ms=round((time.perf_counter() - t0) * 1000, 2))
+    except Exception as e:
+        return ServiceStatus(status="error", error=str(e))
+
+
+def _check_redis() -> ServiceStatus:
+    t0 = time.perf_counter()
+    try:
+        r = redis_lib.from_url(settings.redis_url, socket_connect_timeout=3)
+        r.ping()
+        return ServiceStatus(status="ok", latency_ms=round((time.perf_counter() - t0) * 1000, 2))
+    except Exception as e:
+        return ServiceStatus(status="error", error=str(e))
+
+
+def _check_mongo() -> ServiceStatus:
+    t0 = time.perf_counter()
+    try:
+        client = MongoClient(settings.mongo_url, serverSelectionTimeoutMS=3000)
+
+        # MongoDB 7 fix: explicitly access a DB before ping
+        db = client["admin"]
+        db.command("ping")
+
+        client.close()
+        return ServiceStatus(
+            status="ok",
+            latency_ms=round((time.perf_counter() - t0) * 1000, 2),
+        )
+    except Exception as e:
+        return ServiceStatus(status="error", error=str(e))
+
+
+@router.get("/", response_model=HealthResponse)
+def health_check():
+    services = {
+        "postgres": _check_postgres(),
+        "redis": _check_redis(),
+        "mongodb": _check_mongo(),
+    }
+    overall = "ok" if all(s.status == "ok" for s in services.values()) else "degraded"
+    return HealthResponse(overall=overall, services=services, timestamp=time.time())
+
+
+@router.get("/ollama", response_model=ServiceStatus)
+async def ollama_health():
+    t0 = time.perf_counter()
+    try:
+        response = await invoke_llm_async(
+            system_prompt="You are a health check bot. Reply with exactly one word.",
+            user_message="Respond with: OK",
+            temperature=0.0,
+        )
+        return ServiceStatus(
+            status="ok",
+            latency_ms=round((time.perf_counter() - t0) * 1000, 2),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Ollama unreachable: {e}")
+
+        this is health.py
+
+        from pydantic_settings import BaseSettings
+from functools import lru_cache
+
+
+class Settings(BaseSettings):
+    # Ollama
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3"
+
+    # PostgreSQL
+    postgres_host: str = "localhost"
+    postgres_port: int = 5432
+    postgres_user: str = "shopuser"
+    postgres_password: str = "shoppass"
+    postgres_db: str = "shopping_assistant"
+
+    # Redis
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = "redispass"
+
+    # MongoDB
+    mongo_host: str = "localhost"
+    mongo_port: int = 27017
+    mongo_user: str = "mongouser"
+    mongo_password: str = "mongopass"
+    mongo_db: str = "conversation_logs"
+
+    # FastAPI
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+    api_secret_key: str = "supersecretkey_change_in_production"
+    debug: bool = True
+
+    @property
+    def postgres_url(self) -> str:
+        return (
+            f"postgresql://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/0"
+
+    @property
+    def mongo_url(self) -> str:
+    # Connect to Mongo admin DB first (required for root user auth)
+        return (
+            f"mongodb://{self.mongo_user}:{self.mongo_password}"
+            f"@{self.mongo_host}:{self.mongo_port}/"
+            f"?authSource=admin&directConnection=true"
+        )
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+
+    this is config.py 
+
+
+    i have made changes in this and i am stil getting this error solve it 
+    StatusCode        : 200
+StatusDescription : OK
+Content           : {"overall":"degraded","services":{"postgres":{"
+                    status":"ok","latency_ms":39.17,"error":null},"
+                    redis":{"status":"ok","latency_ms":18.68,"error
+                    ":null},"mongodb":{"status":"error","latency_ms
+                    ":null,"erro...
+RawContent        : HTTP/1.1 200 OK
+                    Content-Length: 370
+                    Content-Type: application/json
+                    Date: Fri, 24 Apr 2026 18:33:06 GMT
+                    Server: uvicorn
+                    
+                    {"overall":"degraded","services":{"postgres":{"
+                    status":"ok","latency_ms":3...
+Forms             : {}
+Headers           : {[Content-Length, 370], [Content-Type, 
+                    application/json], [Date, Fri, 24 Apr 2026 
+                    18:33:06 GMT], [Server, uvicorn]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 370
