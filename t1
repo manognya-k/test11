@@ -1,3 +1,108 @@
+## Option A — Docker (Easiest, 1 Terminal)
+
+Open **PowerShell** and run these one by one:
+
+```powershell
+# Step 1 — Go to project folder
+cd "C:\Users\2480372\Downloads\cap_project-main\cap_project-main\ai-shopping-assistant"
+
+# Step 2 — Create env file
+copy .env.example .env
+
+# Step 3 — Start everything
+docker compose up --build
+```
+
+Then open a **second PowerShell window** and run (first time only):
+
+```powershell
+# Step 4 — Download the AI model (~5 GB, one time only)
+docker exec -it shopping-assistant-ollama ollama pull llama3.1:8b
+```
+
+**Done.** Open http://localhost:3000 — login with `demo@shop.com` / `Demo@123`
+
+---
+
+## Option B — Manual (4 Terminals, Hot-Reload)
+
+### Terminal 1 — Databases
+```powershell
+cd "C:\Users\2480372\Downloads\cap_project-main\cap_project-main\ai-shopping-assistant"
+docker compose up postgres redis mongo ollama -d
+docker exec -it shopping-assistant-ollama ollama pull llama3.1:8b
+```
+
+### Terminal 2 — Backend
+```powershell
+cd "C:\Users\2480372\Downloads\cap_project-main\cap_project-main\ai-shopping-assistant"
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Terminal 3 — Celery Worker
+```powershell
+cd "C:\Users\2480372\Downloads\cap_project-main\cap_project-main\ai-shopping-assistant"
+.\.venv\Scripts\Activate.ps1
+celery -A app.tasks.celery_app.celery_app worker --loglevel=INFO --pool=solo
+```
+
+### Terminal 4 — Frontend
+```powershell
+cd "C:\Users\2480372\Downloads\cap_project-main\cap_project-main\ai-shopping-assistant\frontend"
+npm install
+npm run dev
+```
+
+**Done.** Open http://localhost:5173
+
+---
+
+## URLs
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 (Docker) or http://localhost:5173 (Manual) |
+| API Docs | http://localhost:8000/docs |
+| Health Check | http://localhost:8000/api/v1/health |
+
+## Stop Everything
+
+```powershell
+# Docker mode
+docker compose down
+
+# Manual mode — Ctrl+C in each terminal, then:
+docker compose down
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 2. Folder/File Structure
 shopping-assistant/
 ├── .env
